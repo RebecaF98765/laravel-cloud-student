@@ -1,0 +1,31 @@
+name: Laravel CI (mínim)
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Descarrega el codi
+        uses: actions/checkout@v3
+
+      - name: Instal·la PHP i extensions necessàries
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.2
+          extensions: mbstring, sqlite, pdo_sqlite
+
+      - name: Instal·la dependències
+        run: composer install --no-progress --no-interaction --prefer-dist
+
+      - name: Configura l'entorn
+        run: cp .env.example .env
+
+      - name: Genera la clau d'aplicació
+        run: php artisan key:generate
+
+      - name: Comprovació bàsica
+        run: php artisan --version
