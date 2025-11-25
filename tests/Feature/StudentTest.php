@@ -1,52 +1,101 @@
 <?php
 
+namespace Tests\Feature;
+
 use App\Models\Student;
-use function Pest\Laravel\{get, post, delete};
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
 
-//
-// La pàgina principal es carrega
-//
-it('loads student list page', function () {
-    get('/')->assertStatus(200);
-});
+class StudentTest extends TestCase
+{
+    use RefreshDatabase;
 
-//
-// Mostra estudiants a la llista
-//
-it('shows students on the list', function () {
-    Student::factory()->create([
-        'name' => 'Joan Test',
-        'email' => 'test@test.com',
-        'address' => 'Carrer Test 123',
-    ]);
+    protected function setUp(): void
+    {
+        parent::setUp();
 
-    get('/')->assertSee('Joan Test');
-});
+        // Configurem SQLite in-memory
+        config()->set('database.default', 'sqlite');
+        config()->set('database.connections.sqlite.database', ':memory:');
 
-//
-// Crea un estudiant
-//
-it('can create a student', function () {
-    $response = post('/new', [
-        'name' => 'Maria Test',
-        'email' => 'maria@test.com',
-        'address' => 'Avinguda Test 55',
-    ]);
+        // Executar migracions
+        $this->artisan('migrate');
+    }
 
-    $response->assertRedirect('/index');
+    /** @test */
+    public function it_loads_student_list_page()
+    {
+        $response = $this->get('/');
 
-    expect(Student::where('email', 'maria@test.com')->exists())->toBeTrue();
-});
+        $response->assertStatus(200);
+    }
 
-//
-// Elimina un estudiant
-//
-it('can delete a student', function () {
-    $student = Student::factory()->create();
+    /** @test */
+    public function it_shows_students_on_the_list()
+    {
+        Student::factory()->create([
+            'name' => 'Joan Prova',
+            'email' => 'joan@test.com',
+            'address' => 'Carrer Test'
+        ]);
 
-    $response = delete('/delete/' . $student->id);
+        $response = $this->get('/');
 
-    $response->assertRedirect('/index');
+        $response->assertStatus(200);
+        $response->assertSee('Joan Prova');
+    }
 
-    expect(Student::find($student->id))->toBeNull();
-});
+    /** @test */
+    public function it_can_create_a_student()
+    {
+        $response = $this->post('/new', [
+            'name' => 'Maria Test',
+            'email' => 'maria@test.com',
+            'address' => 'Avinguda Prova 55',
+        ]);
+
+        // El teu controlador redirigeix a /index
+        $response->assertRedirect('/index');
+
+        $this->assertDatabaseHas('students', [
+            'email' => 'maria@test.com'
+        ]);
+    }
+
+    /** @test */
+    public function it_can_update_a_student()
+    {
+        $student = Student::factory()->create([
+            'name' => 'Nom Antic',
+            'email' => 'antic@test.com',
+            'address' => 'Adreça Antiga'
+        ]);
+
+        $response = $this->put("/update/{$student->id}", [
+            'name' => 'Nom Nou',
+            'email' => 'antic@test.com',
+            'address' => 'Adreça Nova'
+        ]);
+
+        $response->assertRedirect('/index');
+
+        $this->assertDatabaseHas('students', [
+            'id' => $student->id,
+            'name' => 'Nom Nou'
+        ]);
+    }
+
+    /** @test */
+    public function it_can_delete_a_student()
+    {
+        $student = Student::factory()->create();
+
+        $response = $this->delete("/delete/{$student->id}");
+
+        $response->assertRedirect('/index');
+
+        $this->assertDatabaseMissing('students', [
+            'id' => $student->id
+        ]);
+    }
+}
