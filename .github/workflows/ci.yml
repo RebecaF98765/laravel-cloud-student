@@ -33,20 +33,17 @@ jobs:
       - name: Create SQLite database
         run: |
           mkdir -p database
-          touch student
+          touch database/database.sqlite
 
       - name: Run migrations in SQLite
         env:
           DB_CONNECTION: sqlite
-          DB_DATABASE: student
+          DB_DATABASE: database/database.sqlite
         run: php artisan migrate --force
 
       - name: Run tests
         env:
           DB_CONNECTION: sqlite
-          DB_DATABASE: student
+          DB_DATABASE: database/database.sqlite
         run: php artisan test --colors=always
       
-
-      - name: Run tests (Pest / PHPUnit)
-        run: php artisan test
