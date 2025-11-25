@@ -5,8 +5,8 @@
 
 @section('content')
 
-<h1 style="color: orange; text-align:center;">
-    🎓 Llistat d'Alumnes — Nova versió desplegada automàticament
+<h1 style="color:darkblue; text-align:center;">
+    🎓 Llistat d'Estudiants — Nova versió desplegada automàticament
 </h1>
 
 <br>
