@@ -6,7 +6,7 @@
 @section('content')
 
 <h1 style="color: orange; text-align:center;">
-    🎓 Llistat de Tontos — Nova versió desplegada automàticament
+    🎓 Llistat d'Alumnes — Nova versió desplegada automàticament
 </h1>
 
 <br>
