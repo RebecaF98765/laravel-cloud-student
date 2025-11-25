@@ -47,6 +47,3 @@ jobs:
           DB_DATABASE: student
         run: php artisan test --colors=always
       
-
-      - name: Run tests (Pest / PHPUnit)
-        run: php artisan test
