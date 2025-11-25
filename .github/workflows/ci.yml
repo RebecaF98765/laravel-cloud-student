@@ -1,0 +1,52 @@
+name: Laravel Tests
+
+on:
+  push:
+    branches: [ "tests" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  laravel-tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: mbstring, pdo_sqlite
+          coverage: none
+
+      - name: Install Dependencies
+        run: composer install --no-interaction --no-progress --prefer-dist
+
+      - name: Copy .env
+        run: cp .env.example .env
+
+      - name: Generate key
+        run: php artisan key:generate
+
+      - name: Create SQLite database
+        run: |
+          mkdir -p database
+          touch student
+
+      - name: Run migrations in SQLite
+        env:
+          DB_CONNECTION: sqlite
+          DB_DATABASE: student
+        run: php artisan migrate --force
+
+      - name: Run tests
+        env:
+          DB_CONNECTION: sqlite
+          DB_DATABASE: student
+        run: php artisan test --colors=always
+      
+
+      - name: Run tests (Pest / PHPUnit)
+        run: php artisan test
