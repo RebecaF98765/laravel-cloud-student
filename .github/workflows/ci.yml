@@ -22,13 +22,31 @@ jobs:
           coverage: none
 
       - name: Install Dependencies
-        run: composer install --no-progress --prefer-dist
+        run: composer install --no-interaction --no-progress --prefer-dist
 
       - name: Copy .env
         run: cp .env.example .env
 
       - name: Generate key
         run: php artisan key:generate
+
+      - name: Create SQLite database
+        run: |
+          mkdir -p database
+          touch database/database.sqlite
+
+      - name: Run migrations in SQLite
+        env:
+          DB_CONNECTION: sqlite
+          DB_DATABASE: database/database.sqlite
+        run: php artisan migrate --force
+
+      - name: Run tests
+        env:
+          DB_CONNECTION: sqlite
+          DB_DATABASE: database/database.sqlite
+        run: php artisan test --colors=always
+      
 
       - name: Run tests (Pest / PHPUnit)
         run: php artisan test
