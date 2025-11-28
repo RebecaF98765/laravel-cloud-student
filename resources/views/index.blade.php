@@ -5,7 +5,7 @@
 
 @section('content')
 
-<h1 style="color:green; text-align:center;">
+<h1 style="color:blueviolet; text-align:center;">
     🎓 Llistat d'Estudiants — Nova versió desplegada automàticament
 </h1>
 
